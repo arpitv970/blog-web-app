@@ -7,7 +7,11 @@ dotenv.config();
 
 const app = express();
 const URI = process.env.MONOGO_URI;
+
+// to parse json datatype as default
+app.use(express.json());
 app.use('/api/user', router);
+
 mongoose
     .connect(URI)
     .then(() => {
