@@ -2,15 +2,17 @@ import express from 'express';
 import mongoose from 'mongoose';
 import router from './routes/user-routes';
 
-const app = express();
+import * as dotenv from 'dotenv';
+dotenv.config();
 
+const app = express();
+const URI = process.env.MONOGO_URI;
 app.use('/api/user', router);
 mongoose
-    .connect(
-        'mongodb+srv://admin:EwE7c4KpiUTSmh5c@cluster0.z1nxi1r.mongodb.net/Blog?retryWrites=true&w=majority'
-    )
+    .connect(URI)
     .then(() => {
         app.listen(5000);
+        console.log('\n');
     })
     .then(() => {
         console.log(
