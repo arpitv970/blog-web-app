@@ -55,21 +55,66 @@ export const deleteUser = async (req, res, next) => {
     try {
         await User.findOne({ email })
             .then((userData) => {
-                const passDB = userData.password;
                 console.log(userData.name);
-                return passDB;
+                return userData.password;
             })
             .then(async (passDB) => {
                 console.log(passDB);
 
-                if (bcryptjs.compareSync(password, passDB)) {
+                if (await bcryptjs.compareSync(password, passDB)) {
                     console.log('Password matched!!');
                     await User.findOneAndDelete({ email });
                     return res.status(201).json({
                         message: 'User found & has been deleted successfully!!',
                     });
                 } else {
-                    return res.status(400).json({message: "Wrong User's credentials detected, please enter correct one!"})
+                    return res.status(400).json({
+                        message:
+                            "Wrong User's credentials detected, please enter correct one!",
+                    });
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    } catch (err) {
+        console.log(err);
+    }
+};
+
+export const editUser = async (req, res, next) => {
+    const { newName, oldEmail, newEmail, oldPassword, newPassword } = req.body;
+
+    try {
+        if (!(await User.findOne({ email: oldEmail }))) {
+            return res.status(400).json({ message: 'User does not exist!' });
+        }
+
+        await User.findOne({ email: oldEmail })
+            .then((userData) => {
+                console.log(userData);
+                return userData;
+            })
+            .then(async (userData) => {
+                if (
+                    await bcryptjs.compareSync(oldPassword, userData.password)
+                ) {
+                    const newHashedPassword = bcryptjs.hashSync(newPassword);
+                    await User.findOneAndUpdate(
+                        { email: oldEmail },
+                        {
+                            name: newName,
+                            email: newEmail,
+                            password: newHashedPassword,
+                        }
+                    );
+
+                    return res.status(201).json({ message: 'Data updated!' });
+                } else {
+                    return res.status(400).json({
+                        message:
+                            "Wrong User's credentials detected, please enter correct one!",
+                    });
                 }
             })
             .catch((err) => {
