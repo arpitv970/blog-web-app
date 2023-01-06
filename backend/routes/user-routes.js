@@ -3,6 +3,7 @@ import {
     deleteUser,
     editUser,
     getAllUsers,
+    login,
     signup,
 } from '../controller/user-controller';
 
@@ -12,5 +13,7 @@ router.get('/', getAllUsers);
 router.post('/signup', signup);
 router.post('/delUser', deleteUser);
 router.post('/editUser', editUser);
+
+router.post('/login', login);
 
 export default router;

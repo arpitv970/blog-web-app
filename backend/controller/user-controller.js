@@ -92,7 +92,7 @@ export const editUser = async (req, res, next) => {
 
         await User.findOne({ email: oldEmail })
             .then((userData) => {
-                console.log(userData);
+                // console.log(userData);
                 return userData;
             })
             .then(async (userData) => {
@@ -123,4 +123,27 @@ export const editUser = async (req, res, next) => {
     } catch (err) {
         console.log(err);
     }
+};
+
+export const login = async (req, res, next) => {
+    const { email, password } = req.body;
+    let existingUser;
+    try {
+        existingUser = await User.findOne({ email });
+    } catch (err) {
+        console.log(err);
+    }
+
+    if (!existingUser) {
+        return res.status(404).json({ message: 'No User found!' });
+    }
+
+    return bcryptjs.compareSync(password, existingUser.password)
+        ? res.status(200).json({ message: 'Logged In successfully!' })
+        : res
+              .status(400)
+              .json({
+                  message:
+                      'Wrong Credentials detected, please enter correct ones',
+              });
 };
