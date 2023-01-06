@@ -1,4 +1,5 @@
 import User from '../model/User';
+import bcryptjs from 'bcryptjs';
 
 export const getAllUsers = async (req, res, next) => {
     let users;
@@ -31,10 +32,12 @@ export const signup = async (req, res, next) => {
             .json({ message: 'User already exists, try to login!' });
     }
 
+    const hashedPassword = bcryptjs.hashSync(password);
+
     const user = new User({
         name,
         email,
-        password,
+        password: hashedPassword,
     });
 
     try {
@@ -44,4 +47,35 @@ export const signup = async (req, res, next) => {
     }
 
     return res.status(201).json({ user });
+};
+
+export const deleteUser = async (req, res, next) => {
+    const { email, password } = req.body;
+
+    try {
+        await User.findOne({ email })
+            .then((userData) => {
+                const passDB = userData.password;
+                console.log(userData.name);
+                return passDB;
+            })
+            .then(async (passDB) => {
+                console.log(passDB);
+
+                if (bcryptjs.compareSync(password, passDB)) {
+                    console.log('Password matched!!');
+                    await User.findOneAndDelete({ email });
+                    return res.status(201).json({
+                        message: 'User found & has been deleted successfully!!',
+                    });
+                } else {
+                    return res.status(400).json({message: "Wrong User's credentials detected, please enter correct one!"})
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    } catch (err) {
+        console.log(err);
+    }
 };
