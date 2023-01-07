@@ -38,6 +38,7 @@ export const signup = async (req, res, next) => {
         name,
         email,
         password: hashedPassword,
+        blogs: [],
     });
 
     try {
@@ -51,78 +52,46 @@ export const signup = async (req, res, next) => {
 
 export const deleteUser = async (req, res, next) => {
     const { email, password } = req.body;
+    const userId = req.params.id;
 
+    let userDel;
     try {
-        await User.findOne({ email })
-            .then((userData) => {
-                console.log(userData.name);
-                return userData.password;
-            })
-            .then(async (passDB) => {
-                // console.log(passDB);
-
-                if (await bcryptjs.compareSync(password, passDB)) {
-                    // console.log('Password matched!!');
-                    await User.findOneAndDelete({ email });
-                    return res.status(201).json({
-                        message: 'User found & has been deleted successfully!!',
-                    });
-                } else {
-                    return res.status(400).json({
-                        message:
-                            "Wrong User's credentials detected, please enter correct one!",
-                    });
-                }
-            })
-            .catch((err) => {
-                return console.log(err);
-            });
+        userDel = await User.findById(userId);
+        if (await bcryptjs.compareSync(password, userDel.password)) {
+            userDel = await User.findOneAndDelete({ email });
+        }
     } catch (err) {
         return console.log(err);
     }
+
+    if (!userDel) {
+        return res.status(500).json({ message: 'Unable to delete User' });
+    }
+
+    return res.status(200).json({ userDel });
 };
 
 export const editUser = async (req, res, next) => {
-    const { newName, oldEmail, newEmail, oldPassword, newPassword } = req.body;
+    const { name, email, password, newPass } = req.body;
+    const userId = req.params.id;
 
+    let userUpdate;
     try {
-        if (!(await User.findOne({ email: oldEmail }))) {
-            return res.status(400).json({ message: 'User does not exist!' });
-        }
-
-        await User.findOne({ email: oldEmail })
-            .then((userData) => {
-                // console.log(userData);
-                return userData;
-            })
-            .then(async (userData) => {
-                if (
-                    await bcryptjs.compareSync(oldPassword, userData.password)
-                ) {
-                    const newHashedPassword = bcryptjs.hashSync(newPassword);
-                    await User.findOneAndUpdate(
-                        { email: oldEmail },
-                        {
-                            name: newName,
-                            email: newEmail,
-                            password: newHashedPassword,
-                        }
-                    );
-
-                    return res.status(201).json({ message: 'Data updated!' });
-                } else {
-                    return res.status(400).json({
-                        message:
-                            "Wrong User's credentials detected, please enter correct one!",
-                    });
-                }
-            })
-            .catch((err) => {
-                return console.log(err);
+        userUpdate = await User.findById(userId);
+        if (await bcryptjs.compareSync(password, userUpdate.password)) {
+            userUpdate = await User.findByIdAndUpdate(userId, {
+                name,
+                email,
+                password: newPass,
             });
+        }
     } catch (err) {
         return console.log(err);
     }
+    if (!userUpdate) {
+        return res.status(500).json({ message: 'Unable to Update the user!' });
+    }
+    return res.status(200).json({ userUpdate });
 };
 
 export const login = async (req, res, next) => {
