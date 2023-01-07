@@ -1,4 +1,6 @@
+import mongoose from 'mongoose';
 import Blog from '../model/Blog';
+import User from '../model/User';
 
 export const getAllBlogs = async (req, res, next) => {
     let blogs;
@@ -17,6 +19,21 @@ export const getAllBlogs = async (req, res, next) => {
 
 export const createBlog = async (req, res, next) => {
     const { title, desc, content, img, user } = req.body;
+
+    let existingUser;
+
+    try {
+        existingUser = await User.findById(user);
+    } catch (err) {
+        return console.log(err);
+    }
+
+    if (!existingUser) {
+        return res
+            .status(400)
+            .json({ message: 'No such user exists with this ID!' });
+    }
+
     let blog = new Blog({
         title,
         desc,
@@ -25,7 +42,12 @@ export const createBlog = async (req, res, next) => {
         user,
     });
     try {
-        await blog.save();
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        await blog.save({ session });
+        existingUser.blogs.push(blog);
+        await existingUser.save({ session });
+        await session.commitTransaction();
     } catch (err) {
         return console.log(err);
     }
@@ -79,7 +101,9 @@ export const deleteBlog = async (req, res, next) => {
     let blog;
 
     try {
-        blog = await Blog.findByIdAndDelete(blogId);
+        blog = await Blog.findByIdAndDelete(blogId).populate('user');
+        await blog.user.blogs.pull(blog);
+        await blog.user.save();
     } catch (err) {
         return console.log(err);
     }
