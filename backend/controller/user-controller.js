@@ -6,7 +6,7 @@ export const getAllUsers = async (req, res, next) => {
     try {
         users = await User.find();
     } catch (err) {
-        console.log(err);
+        return console.log(err);
     }
 
     if (!users) {
@@ -59,10 +59,10 @@ export const deleteUser = async (req, res, next) => {
                 return userData.password;
             })
             .then(async (passDB) => {
-                console.log(passDB);
+                // console.log(passDB);
 
                 if (await bcryptjs.compareSync(password, passDB)) {
-                    console.log('Password matched!!');
+                    // console.log('Password matched!!');
                     await User.findOneAndDelete({ email });
                     return res.status(201).json({
                         message: 'User found & has been deleted successfully!!',
@@ -75,10 +75,10 @@ export const deleteUser = async (req, res, next) => {
                 }
             })
             .catch((err) => {
-                console.log(err);
+                return console.log(err);
             });
     } catch (err) {
-        console.log(err);
+        return console.log(err);
     }
 };
 
@@ -118,10 +118,10 @@ export const editUser = async (req, res, next) => {
                 }
             })
             .catch((err) => {
-                console.log(err);
+                return console.log(err);
             });
     } catch (err) {
-        console.log(err);
+        return console.log(err);
     }
 };
 
@@ -131,7 +131,7 @@ export const login = async (req, res, next) => {
     try {
         existingUser = await User.findOne({ email });
     } catch (err) {
-        console.log(err);
+        return console.log(err);
     }
 
     if (!existingUser) {
@@ -140,10 +140,7 @@ export const login = async (req, res, next) => {
 
     return bcryptjs.compareSync(password, existingUser.password)
         ? res.status(200).json({ message: 'Logged In successfully!' })
-        : res
-              .status(400)
-              .json({
-                  message:
-                      'Wrong Credentials detected, please enter correct ones',
-              });
+        : res.status(400).json({
+              message: 'Wrong Credentials detected, please enter correct ones',
+          });
 };
