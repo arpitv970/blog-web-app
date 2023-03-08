@@ -4,9 +4,12 @@ import router from './routes/user-routes';
 
 import * as dotenv from 'dotenv';
 import blogRouter from './routes/blog-routes';
+
+import cors from 'cors';
 dotenv.config();
 
 const app = express();
+app.use(cors());
 const URI = process.env.MONOGO_URI;
 
 // to parse json datatype as default
