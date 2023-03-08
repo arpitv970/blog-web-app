@@ -14,7 +14,7 @@ const App = () => {
     const isLogged = useSelector((state) => state.isLogged);
     console.log(isLogged);
     return (
-        <div className='font-poppins'>
+        <div className='font-poppins selection:bg-devBlue selection:text-devYellow'>
             <Navbar />
             <Routes>
                 <Route path='/' element={<Home />} />
