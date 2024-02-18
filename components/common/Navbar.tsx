@@ -1,12 +1,13 @@
-import React from 'react'
-import { Button } from '@/components/ui/button'
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { ModeToggle } from "./ModeToggle";
 
 const Navbar = () => {
   return (
     <div>
-      <Button>Toggle theme</Button>
+      <ModeToggle />
     </div>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;
